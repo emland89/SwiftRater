@@ -18,12 +18,32 @@ import StoreKit
     case any
 }
 
+public protocol SwiftRaterDelegate: AnyObject {
+
+    func swiftRaterWillPresentStoreReview(_ rater: SwiftRater)
+    func swiftRaterWillPresentRequestAlert(_ rater: SwiftRater)
+    func swiftRater(_ rater: SwiftRater, didSelectRequestAlert button: SwiftRater.ButtonIndex)
+}
+
 @objc public class SwiftRater: NSObject {
 
-    enum ButtonIndex: Int {
+    public enum ButtonIndex: Int {
         case cancel = 0
         case rate = 1
         case later = 2
+        
+        public var description: String {
+            switch self {
+            case .cancel:
+                return "cancel"
+                
+            case .later:
+                return "later"
+                
+            case .rate:
+                return "rate"
+            }
+        }
     }
 
     @objc public let SwiftRaterErrorDomain = "Siren Error Domain"
@@ -102,6 +122,8 @@ import StoreKit
     
     @objc public static var appID: String?
 
+    public var delegate: SwiftRaterDelegate?
+    
     private static var appVersion: String {
         get {
             return Bundle.main.infoDictionary!["CFBundleShortVersionString"] as? String ?? "0.0.0"
@@ -337,6 +359,7 @@ import StoreKit
     private func showRatingAlert(host: UIViewController?, force: Bool) {
         NSLog("[SwiftRater] Trying to show review request dialog.")
         if #available(iOS 10.3, *), SwiftRater.useStoreKitIfAvailable, !force {
+            delegate?.swiftRaterWillPresentStoreReview(self)
             SKStoreReviewController.requestReview()
             UsageDataManager.shared.isRateDone = true
         } else {
@@ -346,25 +369,30 @@ import StoreKit
                 [unowned self] action -> Void in
                 self.rateAppWithAppStore()
                 UsageDataManager.shared.isRateDone = true
+                delegate?.swiftRater(self, didSelectRequestAlert: .rate)
             })
             alertController.addAction(rateAction)
             
             if SwiftRater.showLaterButton {
                 alertController.addAction(UIAlertAction(title: laterText, style: .default, handler: {
-                    action -> Void in
+                    [unowned self] action -> Void in
                     UsageDataManager.shared.saveReminderRequestDate()
+                    
+                    self.delegate?.swiftRater(self, didSelectRequestAlert: .later)
                 }))
             }
             
             alertController.addAction(UIAlertAction(title: cancelText, style: .cancel, handler: {
-                action -> Void in
+                [unowned self] action -> Void in
                 UsageDataManager.shared.isRateDone = true
+                self.delegate?.swiftRater(self, didSelectRequestAlert: .cancel)
             }))
             
             if #available(iOS 9.0, *) {
                 alertController.preferredAction = rateAction
             }
             
+            delegate?.swiftRaterWillPresentRequestAlert(self)
             host?.present(alertController, animated: true, completion: nil)
         }
     }
