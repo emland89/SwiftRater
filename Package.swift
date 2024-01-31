@@ -1,12 +1,13 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
     name: "SwiftRater",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v10),
-        .macOS(.v10_10)
+        .iOS(.v16),
+        .macOS(.v13),
+        .visionOS(.v1)
     ],
     products: [
         .library(

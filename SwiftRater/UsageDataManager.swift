@@ -6,11 +6,7 @@
 //  Copyright © 2017年 com.takecian. All rights reserved.
 //
 
-#if os(iOS)
-import UIKit
-#elseif os(macOS)
-import AppKit
-#endif
+import Foundation
 
 let SwiftRaterInvalid = -1
 
@@ -20,7 +16,7 @@ class UsageDataManager {
     var usesUntilPrompt: Int = SwiftRaterInvalid
     var significantUsesUntilPrompt: Int = SwiftRaterInvalid
     var daysBeforeReminding: Int = SwiftRaterInvalid
-
+    
     var showLaterButton: Bool = true
     var debugMode: Bool = false
     var conditionsMetMode: SwiftRaterConditionsMetMode = .all
@@ -31,6 +27,7 @@ class UsageDataManager {
     static private let keySwiftRaterRateDone = "keySwiftRaterRateDone"
     static private let keySwiftRaterTrackingVersion = "keySwiftRaterTrackingVersion"
     static private let keySwiftRaterReminderRequestDate = "keySwiftRaterReminderRequestDate"
+    static private let keySwiftRaterShouldShowRequestNextSignificantEvent = "keySwiftRaterShouldShowRequestNextSignificantEvent"
 
     static var shared = UsageDataManager()
 
@@ -48,7 +45,7 @@ class UsageDataManager {
         let ud = UserDefaults.standard
         ud.register(defaults: defaults)
     }
-
+    
     var isRateDone: Bool {
         get {
             return userDefaults.bool(forKey: UsageDataManager.keySwiftRaterRateDone)
@@ -65,6 +62,16 @@ class UsageDataManager {
         }
         set {
             userDefaults.set(newValue, forKey: UsageDataManager.keySwiftRaterTrackingVersion)
+            userDefaults.synchronize()
+        }
+    }
+    
+    var shouldShowRequestNextSignificantEvent: Bool {
+        get {
+            userDefaults.bool(forKey: UsageDataManager.keySwiftRaterShouldShowRequestNextSignificantEvent)
+        }
+        set {
+            userDefaults.set(newValue, forKey: UsageDataManager.keySwiftRaterShouldShowRequestNextSignificantEvent)
             userDefaults.synchronize()
         }
     }

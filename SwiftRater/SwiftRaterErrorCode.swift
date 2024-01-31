@@ -6,11 +6,6 @@
 //  Copyright © 2017年 com.takecian. All rights reserved.
 //
 
-#if os(iOS)
-import UIKit
-#elseif os(macOS)
-import AppKit
-#endif
 
 enum SwiftRaterErrorCode: Int {
     case malformedURL = 1000
